@@ -65,7 +65,7 @@ kafka-topics.sh --zookeeper 127.0.0.1:2181 \
 
 ### 1. Kafka CLI example.001 Consumer (group: example.001.vis.app)
 ```bash
-kafka-console-consumer.sh --bootstrap-server 127.0.0.1:9092 \
+kafka-console-consumer.sh --bootstrap-server 149.81.197.180:9092 \
 --topic example.001 \
 --group example.001.vis.app \
 --from-beginning \
@@ -127,4 +127,18 @@ python3 live_plot_consumer.py --limit 10000 --window 50 --interval 300
 
 ### 6. Python Data Producer Mockup
 ```bash
+cd python-kafka-producer-mockup &&
+python3.7 -m venv env &&
+source env/bin/activate &&
+python3 -m pip install -r requirements.txt &&
+python3 kafka-python-sumTheAge-producer.py --min -5 --max 7 --sleep 0.2 -n 200
 ```
+
+<p align="center">
+  <img src="visualizations/screen-record.gif"
+       alt="screen-record.gif"
+       width=90%>
+</p>
+
+---
+
