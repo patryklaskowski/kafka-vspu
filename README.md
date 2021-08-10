@@ -5,6 +5,7 @@ Kafka Architecture for Video Stream Processing Unit
 [![Java](https://img.shields.io/badge/Java-1.8-ED8B00?style=flat&logo=Java&logoColor=white)](https://java.com/)
 [![Apache_Kafka](https://img.shields.io/badge/Apache_Kafka-2.8-231F20?style=flat&logo=Apache-Kafka&logoColor=white)](https://kafka.apache.org/)
 [![Apache_Maven](https://img.shields.io/badge/Apache_Maven-4.0-C71A36?style=flat&logo=Apache-Maven&logoColor=white)](https://maven.apache.org/)
+![IOS](https://img.shields.io/badge/iOS-000000?style=flat&logo=ios&logoColor=white)
 
 
 ---
