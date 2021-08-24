@@ -12,10 +12,11 @@ class DynamicLinePlot:
     matplotlib.use('macosx')
     plt.style.use('fivethirtyeight')
 
-    def __init__(self, func, fargs=None, limit=100, window_size=50, time_format='%H:%M:%S'):
+    def __init__(self, func, limit=100, window_size=50, time_format='%H:%M:%S', limit_func=None):
         # func() has to return single number datapoint
         self.func = func
-        self.limit = limit
+        self.limit = int(limit)
+        self.limit_func = limit_func if callable(limit_func) else None
         self.time_format = time_format
         # Data containers
         self.y = deque(maxlen=window_size)
@@ -23,12 +24,19 @@ class DynamicLinePlot:
         self.x_labels = deque(maxlen=window_size)
 
         self.ani = None
+        self.margin = 0.1
+
+    def _limit_value(self):
+        if self.limit_func:
+            return int(self.limit_func())
+        return self.limit
 
     def _plotting_function(self, i):
         # get data
         datapoint = self.func() or 0
         self.y.append(datapoint)
-        self.limit_values.append(self.limit)
+        limit = self._limit_value()
+        self.limit_values.append(limit)
         self.x_labels.append(datetime.now().strftime(self.time_format))
 
         # clear axis
@@ -36,7 +44,7 @@ class DynamicLinePlot:
 
         # Plot data
         plt.plot(self.y, label=f'{type(self.func).__name__}')
-        plt.plot(self.limit_values, label=f'Limit: {self.limit}', color='red')
+        plt.plot(self.limit_values, label=f'Limit: {limit}', color='red')
 
         # Text annotation
         last_x, last_y = len(self.y) - 1, self.y[-1]
@@ -45,12 +53,9 @@ class DynamicLinePlot:
                                      f'{self.x_labels[-1]}')
 
         # Limits
-        # 10% above limit or 10% above highest datapoint
-        y_upper_lim = int(self.limit + self.limit * 0.1) if max(self.y) < self.limit else int(max(self.y) + max(self.y) * 0.1)
+        # self.margin% above limit or self.margin% above highest datapoint
+        y_upper_lim = int(limit + limit * self.margin) if max(self.y) < limit else int(max(self.y) + max(self.y) * self.margin)
         plt.ylim(0, y_upper_lim)
-        # 5% to the right
-        # x_right_lim = int(len(self.x_labels) + len(self.x_labels) * 0.5)
-        # plt.xlim(left=0, right=x_right_lim)
 
         # Labels
         plt.xticks(range(len(self.y)), self.x_labels)
@@ -78,13 +83,23 @@ class DynamicLinePlot:
 
 if __name__ == '__main__':
 
-    class Xyz:
+    # Static limit
+    # Using static limit argument
+    # dlp = DynamicLinePlot(func=lambda: np.random.randint(0, 10), limit=10, window_size=10)
+    # dlp.run(interval_ms=10)
 
-        def data_generator(self):
-            print(f'id: {id(self)}')
-            return np.random.randint(0, 10)
+    # or
 
-    consumer = Xyz()
+    # Dynamic limit
+    # Using limit_func argument with connection to Redis Database
+    #
+    from functools import partial
+    from utils.redis_db_connection import RedisConnection
 
-    dlp = DynamicLinePlot(func=consumer.data_generator, limit=10, window_size=10)
+    rc = RedisConnection()
+    get_limit_or_13 = partial(rc.get, 'limit', 13)
+
+    dlp = DynamicLinePlot(func=lambda: np.random.randint(0, 10),
+                          limit_func=get_limit_or_13,
+                          window_size=10)
     dlp.run(interval_ms=10)
