@@ -1,4 +1,9 @@
-import numpy as np
+"""
+Notification system action for VSPU project
+
+@author: Patryk Jacek Laskowski
+"""
+
 import matplotlib
 import matplotlib.pyplot as plt
 
@@ -12,31 +17,47 @@ class DynamicLinePlot:
     matplotlib.use('macosx')
     plt.style.use('fivethirtyeight')
 
-    def __init__(self, func, limit=100, window_size=50, time_format='%H:%M:%S', limit_func=None):
+    def __init__(self, func, limit=None, window_size=50, time_format='%H:%M:%S', limit_func=None):
+        """
+
+        Limit
+        Static limit:
+            use limit arg to set static limit value
+        Dynamic limit:
+            use limit_func to set dynamic limit behavior. limit_func argument has to be callable object.
+            When limit_func is called single number needs to be returned.
+        """
         # func() has to return single number datapoint
         self.func = func
-        self.limit = int(limit)
+        self.limit = limit and int(limit)
         self.limit_func = limit_func if callable(limit_func) else None
         self.time_format = time_format
+        self.window_size = window_size
         # Data containers
         self.y = deque(maxlen=window_size)
         self.limit_values = deque(maxlen=window_size)
         self.x_labels = deque(maxlen=window_size)
 
-        self.ani = None
+        self.animation = None
         self.margin = 0.1
 
-    def _limit_value(self):
+    def __str__(self):
+        text = f'{self.__class__.__name__}'
+        arguments = '\n'.join([f'- {key}={val}' for key, val in vars(self).items()])
+        return '\n'.join([text, arguments])
+
+    def _limit_value(self) -> int:
+        """limit_func is superior to static limit value
+        Returns int or raises an Exception"""
         if self.limit_func:
-            return int(self.limit_func())
+            limit = self.limit_func()  # This may cause delay if requires network connection
+            return int(limit) if limit else 0
         return self.limit
 
     def _plotting_function(self, i):
         # get data
         datapoint = self.func() or 0
         self.y.append(datapoint)
-        limit = self._limit_value()
-        self.limit_values.append(limit)
         self.x_labels.append(datetime.now().strftime(self.time_format))
 
         # clear axis
@@ -44,17 +65,24 @@ class DynamicLinePlot:
 
         # Plot data
         plt.plot(self.y, label=f'{type(self.func).__name__}')
-        plt.plot(self.limit_values, label=f'Limit: {limit}', color='red')
 
         # Text annotation
         last_x, last_y = len(self.y) - 1, self.y[-1]
         plt.scatter(last_x, last_y)
-        plt.text(last_x, last_y + 1, f'value: {self.y[-1]}\n'
-                                     f'{self.x_labels[-1]}')
+        plt.text(last_x, last_y, f'value: {self.y[-1]}\n'
+                                 f'{self.x_labels[-1]}')
 
         # Limits
-        # self.margin% above limit or self.margin% above highest datapoint
-        y_upper_lim = int(limit + limit * self.margin) if max(self.y) < limit else int(max(self.y) + max(self.y) * self.margin)
+        # y_upper_lim: self.margin% above limit or self.margin% above highest datapoint
+        if self.limit or self.limit_func:
+            limit = self._limit_value()
+            self.limit_values.append(limit)
+            plt.plot(self.limit_values, label=f'Limit: {limit}', color='red')
+            y_upper_lim = int(limit + limit * self.margin) if max(self.y) < max(self.limit_values) else\
+                int(max(self.y) + max(self.y) * self.margin)
+        else:
+            y_upper_lim = int(max(self.y) + max(self.y) * self.margin)
+
         plt.ylim(0, y_upper_lim)
 
         # Labels
@@ -68,10 +96,11 @@ class DynamicLinePlot:
 
     def run(self, interval_ms=100):
         """Blocking. Works only as a main thread"""
+        print(f'Running {str(self)}')
         fig = plt.figure(figsize=(12, 8))
-        self.ani = FuncAnimation(fig=plt.gcf(),
-                                 func=self._plotting_function,
-                                 interval=interval_ms)
+        self.animation = FuncAnimation(fig=fig,  # possibly also plt.gcf()
+                                       func=self._plotting_function,
+                                       interval=interval_ms)
         print('Running plot...')
         try:
             plt.show(block=True)
@@ -83,23 +112,7 @@ class DynamicLinePlot:
 
 if __name__ == '__main__':
 
-    # Static limit
-    # Using static limit argument
-    # dlp = DynamicLinePlot(func=lambda: np.random.randint(0, 10), limit=10, window_size=10)
-    # dlp.run(interval_ms=10)
+    import random
 
-    # or
-
-    # Dynamic limit
-    # Using limit_func argument with connection to Redis Database
-    #
-    from functools import partial
-    from utils.redis_db_connection import RedisConnection
-
-    rc = RedisConnection()
-    get_limit_or_13 = partial(rc.get, 'limit', 13)
-
-    dlp = DynamicLinePlot(func=lambda: np.random.randint(0, 10),
-                          limit_func=get_limit_or_13,
-                          window_size=10)
+    dlp = DynamicLinePlot(func=lambda: random.randint(0, 10), limit=None, window_size=50)
     dlp.run(interval_ms=10)

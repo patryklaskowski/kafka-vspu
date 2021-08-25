@@ -29,31 +29,62 @@ def parse_args():
     parser.add_argument('--window', type=int, default=50, help='Window size. Number of visible data points')
     parser.add_argument('--interval', type=int, default=100, help='Wait milliseconds between plot refresh')
 
+    # Redis
+    parser.add_argument('--redis', action='store_true')
+    parser.add_argument('--redis_ip', type=str, default=None, help='Redis server ip e.g. 127.0.0.1')
+    parser.add_argument('--redis_port', type=int, default=6379, help='Redis server port.')
+    parser.add_argument('--redis_passwd', type=str, default=None, help='Redis server ip.')
+    parser.add_argument('--redis_limit_key', type=str, default='limit', help='Key in Redis to get limit integer value.')
+
     return parser.parse_args()
 
 
 if __name__ == '__main__':
 
     args = parse_args()
+
     limit = args.limit
     window = args.window
     interval = args.interval
 
+    limit_func = None
+
+    # Redis
+    if args.redis:
+        redis_ip = args.redis_ip
+        redis_port = args.redis_port
+        redis_passwd = args.redis_passwd
+        redis_limit_key = args.redis_limit_key
+
+        from gateways.redis_db_gateway import RedisGateway
+        redis_gateway = RedisGateway(host=redis_ip, port=redis_port, password=redis_passwd)
+
+        from functools import partial
+        get_limit_from_redis = partial(redis_gateway.get, redis_limit_key)
+        limit_func = get_limit_from_redis
+
     try:
+
+        # Kafka consumer to establish incoming data
         consumer_t = MyKafkaConsumerThread(TOPIC, conf, poll_timeout_s=1,
                                            key_deserializer=lambda x: x.decode('utf-8'),
                                            value_deserializer=lambda x: int.from_bytes(x, 'big'))
         consumer_t.start()
 
-        dlp = DynamicLinePlot(consumer_t.newest_datapoint, limit=limit, window_size=window)
+        # Dynamic line plot connected to Kafka server through Kafka consumer
+        # If limit_func is provided it's value may be defined dynamically
+        dlp = DynamicLinePlot(func=consumer_t.newest_datapoint,
+                              limit=limit,
+                              window_size=window,
+                              limit_func=limit_func)
         dlp.run(interval_ms=interval)
+
     except KeyboardInterrupt:
         print('Keyboard interrupt, closing...')
-        consumer_t.stop()
-    except Exception as e:
-        print(f'Exception occured: {e}')
-        consumer_t.stop()
+    except BaseException as e:
+        raise Exception('Unknown exception occurred.') from e
     finally:
         consumer_t.stop()
         consumer_t.join(timeout=10)
-    print('Done!')
+
+    print('\nDone!')
