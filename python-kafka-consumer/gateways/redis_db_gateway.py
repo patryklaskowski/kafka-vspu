@@ -12,6 +12,7 @@ Run Redis with Docker:
 Set for key 'limit' value of 150 with expiration time 5 s.
 > SET limit 150 EX 5
 """
+import argparse
 import time
 import os
 
@@ -20,17 +21,22 @@ import redis
 
 class RedisGateway:
 
-    HOST_KEY = 'REDIS_IP'
-    PORT_KEY = 'REDIS_PORT'
-    PASSWD_KEY = 'REDIS_PASSWD'
+    HOST_ENV_KEY = 'REDIS_IP'
+    PORT_ENV_KEY = 'REDIS_PORT'
+    PASSWD_ENV_KEY = 'REDIS_PASSWD'
 
-    def __init__(self, host=None, port=None, password=None):
-        self.host = host or os.getenv(self.HOST_KEY, None)
-        self.port = port or os.getenv(self.PORT_KEY, 6379)
-        self.password = password or os.getenv(self.PASSWD_KEY, None)
+    def __init__(self, host=None, port=6379, password=None):
+        self.host = host
+        self.port = port
+        self.password = password
 
         self.r = redis.Redis(self.host, self.port, password=self.password, db=0, decode_responses=True)
+        self._test_connection()
 
+    def __str__(self):
+        return f'<{self.__class__.__name__} instance connected to server {self.host}:{self.port}>'
+
+    def _test_connection(self):
         try:
             self.r.echo('test_value')
         except redis.exceptions.AuthenticationError:
@@ -40,22 +46,45 @@ class RedisGateway:
         except redis.exceptions.ConnectionError:
             raise redis.exceptions.ConnectionError(f'Cannot connect to {self.host}:{self.port}. Connection refused.') from None
 
-    def get(self, value, default=None):
-        return self.r.get(value) or default
-        
+    def get(self, key, default=None, map_type=int):
+        return map_type(self.r.get(key)) or default
+
+    @classmethod
+    def create_redis_parser(cls):
+        """
+        Helps to build command line interface common arguments for RedisGateway.
+
+        To combine two parsers use 'parents' argument of argparse.ArgumentParser
+        e.g.
+            final_parser = argparse.ArgumentParser(conflict_handler='resolve', parents=[parser_A, parser_B])
+            args = final_parser.parse_args()
+        """
+        parser = argparse.ArgumentParser()
+
+        parser.add_argument('--redis_ip', type=str, default=None,
+                            help=f'Redis server ip. Possible to use ENV var {cls.HOST_ENV_KEY}.')
+        parser.add_argument('--redis_port', type=int, default=None,
+                            help=f'Redis server port. Possible to use ENV var {cls.PORT_ENV_KEY}.')
+        parser.add_argument('--redis_passwd', type=str, default=None,
+                            help=f'Redis server ip. Possible to use ENV var {cls.PASSWD_ENV_KEY}.')
+
+        parser.add_argument('--redis_limit_key', type=str, default='limit', help='Key in Redis to get')
+
+        return parser
+
 
 if __name__ == '__main__':
 
-    import argparse
-
-    parser = argparse.ArgumentParser()
-    parser.add_argument('-ip', '--redis_ip', type=str, default=None, help='Redis server ip')
-    parser.add_argument('-port', '--redis_port', type=int, default=6379, help='Redis server port')
-    parser.add_argument('-passwd', '--redis_passwd', type=str, default=None, help='Redis server ip')
-    parser.add_argument('-limit_key', '--redis_limit_key', type=str, default='limit', help='Key in Redis to get')
+    parser = RedisGateway.create_redis_parser()
     args = parser.parse_args()
 
-    rg = RedisGateway(host=args.redis_ip, port=args.redis_port, password=args.redis_passwd)
+    # From args or read from ENV variables
+    host = args.redis_ip or os.getenv(RedisGateway.HOST_ENV_KEY, '127.0.0.1')
+    port = args.redis_port or os.getenv(RedisGateway.PORT_ENV_KEY, 6379)
+    passwd = args.redis_passwd or os.getenv(RedisGateway.PASSWD_ENV_KEY)
+
+    rg = RedisGateway(host, port, passwd)
+    print(rg)
 
     while True:
         limit = rg.get(args.redis_limit_key)
