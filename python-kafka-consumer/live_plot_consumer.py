@@ -27,7 +27,7 @@ def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('--limit', type=int, default=10000, help='Limit line value')
     parser.add_argument('--window', type=int, default=50, help='Window size. Number of visible data points')
-    parser.add_argument('--interval', type=int, default=100, help='Wait milliseconds between plot refresh')
+    parser.add_argument('--interval_ms', type=int, default=500, help='Wait milliseconds between plot refresh')
 
     # Redis
     parser.add_argument('--redis', action='store_true')
@@ -42,10 +42,6 @@ def parse_args():
 if __name__ == '__main__':
 
     args = parse_args()
-
-    limit = args.limit
-    window = args.window
-    interval = args.interval
 
     limit_func = None
 
@@ -74,10 +70,10 @@ if __name__ == '__main__':
         # Dynamic line plot connected to Kafka server through Kafka consumer
         # If limit_func is provided it's value may be defined dynamically
         dlp = DynamicLinePlot(func=consumer_t.newest_datapoint,
-                              limit=limit,
-                              window_size=window,
+                              limit=args.limit,
+                              window_size=args.window,
                               limit_func=limit_func)
-        dlp.run(interval_ms=interval)
+        dlp.run(interval_ms=args.interval_ms)
 
     except KeyboardInterrupt:
         print('Keyboard interrupt, closing...')

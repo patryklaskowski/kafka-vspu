@@ -43,7 +43,7 @@ class MyKafkaConsumerThread(Thread):
         self._stop_event = Event()
         self._population += 1
 
-        print(f'[{self.name}] Thread named {self.name} has been initialized.')
+        print(f'[{self.name}] Thread named {self.name} has been initialized. Topic: {self.topic}')
 
     def stop(self):
         """Stop event triggers data sourcing loop off"""
@@ -93,8 +93,9 @@ class MyKafkaConsumerThread(Thread):
 
             while not self._stop_event.is_set():
                 msg = self._consume_data()  # Raises Exceptions
-                if msg: self.data.append((self.key_deserializer_fn(msg.key()),
-                                          self.value_deserializer_fn(msg.value())))
+                if msg:
+                    self.data.append((self.key_deserializer_fn(msg.key()),
+                                      self.value_deserializer_fn(msg.value())))
 
         except KeyboardInterrupt:
             print(f'[{self.name}] Keyboard interruption')
