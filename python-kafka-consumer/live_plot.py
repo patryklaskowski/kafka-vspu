@@ -1,9 +1,11 @@
 """
-Reset offset with Kafka CLI:
-> kafka-consumer-groups.sh --bootstrap-server 149.81.197.180:9092 \
- --topic example.001.age.sum \
- --group graph-app \
- --reset-offsets --to-earliest --execute
+Live plot system for VSPU project.
+Plots stream of incoming data provided by callable object.
+Possible to set limit value (both static and dynamic).
+
+Based on matplotlib
+
+@author: Patryk Jacek Laskowski
 """
 
 import argparse
@@ -53,7 +55,6 @@ if __name__ == '__main__':
         limit_func = get_limit_from_redis
 
     try:
-
         # Kafka consumer to establish incoming data
         consumer_t = MyKafkaConsumerThread(TOPIC, conf, poll_timeout_s=1,
                                            key_deserializer=lambda x: x.decode('utf-8'),
@@ -74,7 +75,8 @@ if __name__ == '__main__':
     except BaseException as e:
         raise Exception('Unknown exception occurred.') from e
     finally:
-        consumer_t.stop()
-        consumer_t.join(timeout=10)
+        if 'consumer_t' in vars():
+            consumer_t.stop()
+            consumer_t.join(timeout=10)
 
     print('\nDone!')
