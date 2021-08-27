@@ -100,7 +100,14 @@ public class SumTheAge {
                 // https://docs.confluent.io/platform/current/streams/developer-guide/datatypes.html
                 .groupByKey(Grouped.with(Serdes.String(), Serdes.Integer()))
                 // Reduce within group(s)
-                .reduce((acc, val) -> acc + val);
+                .reduce((acc, val) -> {
+                    System.out.println("|__/ [peek reduce KTable] acc: " + acc + " => val:" + val);
+                    return acc + val;
+                })
+                .filter((key, value) -> {
+                    System.out.println("|__/ [peek FINAL KTable] key" + key + " => " + value);
+                    return true;
+                });
 
         sumOfAge.toStream().to(OUTPUT_TOPIC, Produced.valueSerde(Serdes.Integer()));  // or (if want to overwrite both): Produced.with(stringSerde, integerSerde));
 

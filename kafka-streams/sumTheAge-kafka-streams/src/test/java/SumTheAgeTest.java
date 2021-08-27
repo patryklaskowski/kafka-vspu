@@ -89,4 +89,45 @@ public class SumTheAgeTest {
         OutputVerifier.compareKeyValue(readOutput(), "sum", 10);
         assertEquals(readOutput(), null);
     }
+
+    @Test
+    public void assertAcceptsNegativeValues(){
+        String key = "camera_001";
+
+        // This value should be filtered - not even taken under consideration
+        String a = "{\"name\": \"Patryk_4\", \"surname\": \"Laskowski_4\", \"age\": 4}";
+        pushNewInputRecord(key, a);
+
+        OutputVerifier.compareKeyValue(readOutput(), "sum", 4);
+
+        String b = "{\"name\": \"Patryk_-4\", \"surname\": \"Laskowski_-4\", \"age\": -4}";
+        pushNewInputRecord(key, b);
+
+        OutputVerifier.compareKeyValue(readOutput(), "sum", 0);
+        assertEquals(readOutput(), null);
+    }
+
+    @Test
+    public void assertSumMayBeNegative(){
+        String key = "camera_001";
+
+        // This value should be filtered - not even taken under consideration
+        String a = "{\"name\": \"Patryk_-10\", \"surname\": \"Laskowski_-10\", \"age\": -10}";
+        pushNewInputRecord(key, a);
+        OutputVerifier.compareKeyValue(readOutput(), "sum", -10);
+
+        String b = "{\"name\": \"Patryk_4\", \"surname\": \"Laskowski_4\", \"age\": 4}";
+        pushNewInputRecord(key, b);
+        OutputVerifier.compareKeyValue(readOutput(), "sum", -6);
+
+        String c = "{\"name\": \"Patryk_4\", \"surname\": \"Laskowski_4\", \"age\": 4}";
+        pushNewInputRecord(key, c);
+        OutputVerifier.compareKeyValue(readOutput(), "sum", -2);
+
+        String d = "{\"name\": \"Patryk_-8\", \"surname\": \"Laskowski_-8\", \"age\": -8}";
+        pushNewInputRecord(key, d);
+        OutputVerifier.compareKeyValue(readOutput(), "sum", -10);
+
+        assertEquals(readOutput(), null);
+    }
 }
