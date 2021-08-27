@@ -1,9 +1,10 @@
 """
-Reset offset with Kafka CLI:
-> kafka-consumer-groups.sh --bootstrap-server 149.81.197.180:9092 \
- --topic example.001.age.sum \
- --group graph-app \
- --reset-offsets --to-earliest --execute
+Email notification system for VSPU project.
+Send email based on incoming data stream and either dynamic or static limit value.
+System sources data from Kafka topic and compare to current limit.
+If data value exceeds limit value, sends email.
+
+@Author: Patryk Jacek Laskowski
 """
 
 import argparse
@@ -25,10 +26,9 @@ def create_parser():
 
     parser.add_argument('--interval_s', type=int, default=1,
                         choices=[1, 5, 10, 60],
-                        help='How often to try send an email in seconds.')
-    parser.add_argument('--maxlen', type=int, default=30,
-                        choices=[10, 20, 30, 40, 50, 100],
-                        help='Data collector maximum length.')
+                        help='How often validate the data.')
+    parser.add_argument('--limit', type=int, default=100,
+                        help='Static limit value')
 
     return parser
 
@@ -39,7 +39,6 @@ if __name__ == '__main__':
 
     from datetime import datetime
     from functools import partial
-    from collections import deque
 
     from actions.send_gmail import Gmail
     from gateways.redis_db_gateway import RedisGateway
@@ -57,8 +56,12 @@ if __name__ == '__main__':
     gmail = Gmail(args.gmail_user, args.gmail_passwd)
 
     # Create redis limit key caller
-    redis_gateway = RedisGateway(args.redis_ip, args.redis_port, args.redis_passwd)
-    limit_from_redis = partial(redis_gateway.get, key=args.redis_limit_key, default=None, map_type=int)
+    limit_func = None
+    if args.redis:
+        redis_gateway = RedisGateway(args.redis_host, args.redis_port, args.redis_passwd)
+        limit_func = partial(redis_gateway.get, key=args.redis_limit_key, default=None, map_type=int)
+    else:
+        limit_func = lambda: args.limit
 
     try:
 
@@ -69,17 +72,15 @@ if __name__ == '__main__':
         # Start Kafka consumer Thread (non-blocking)
         consumer_t.start()
 
+        print(f'[{datetime.now().strftime(Gmail.date_format)}] Sleep 3s. to warmup') or time.sleep(3)
+
         # Create send email loop
-        received_data = deque(maxlen=args.maxlen)
-        # TODO: Same for redis - to prevent delays. Create list and collect future objects tat eventually become values
         while True:
-            # TODO: Not sure if received_data is necessary
-            received_data.append(consumer_t.newest_datapoint() or 0)
-            recent_max = max(received_data)
-            limit = limit_from_redis()  # redis call through web. Might cause delays
+            recent_max = consumer_t.recent_max_value() or 0
+            limit = limit_func()
+
             print(f'[{datetime.now().strftime(Gmail.date_format)}] '
-                  f'Max top{args.maxlen} last values: {recent_max}. '
-                  f'Last value: {received_data[-1]}.'
+                  f'Recent max {recent_max} (top{consumer_t.maxlen} values). '
                   f'Limit: {limit}. '
                   f'Interval: {args.interval_s} s.')
 

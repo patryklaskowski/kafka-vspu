@@ -1,5 +1,6 @@
 """
-Notification system action for VSPU project
+Action for notification system action of VSPU project.
+Sends email using Gmail SMTP protocol.
 
 @author: Patryk Jacek Laskowski
 """
@@ -13,7 +14,7 @@ from email.message import EmailMessage
 
 class Gmail:
     """
-    Sends emails using Gmail smtp server.
+    Sends emails using Gmail SMTP protocol.
 
     User is Your Gmail email address.
     Password has to be generated upfront using Google account settings:
@@ -113,7 +114,7 @@ class Gmail:
 
         join_with_space = partial(JoinNargsCustomAction, join_with=' ')
 
-        parser.add_argument('--gmail_subject', default=None, nargs='+', required=True,
+        parser.add_argument('--gmail_subject', default='Python Automatic Gmail Notification', nargs='+', required=False,
                             type=str,
                             action=join_with_space,
                             help='Limit line value')
