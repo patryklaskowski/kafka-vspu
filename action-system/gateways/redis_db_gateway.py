@@ -26,7 +26,7 @@ import redis
 
 class RedisGateway:
 
-    HOST_ENV_KEY = 'REDIS_IP'
+    HOST_ENV_KEY = 'REDIS_HOST'
     PORT_ENV_KEY = 'REDIS_PORT'
     PASSWD_ENV_KEY = 'REDIS_PASSWD'
 
@@ -71,11 +71,11 @@ class RedisGateway:
         parser.add_argument(redis_flag, action='store_true', required=False,
                             help='Redis flag to help determine if Redis connection is desired.')
 
-        parser.add_argument('--redis_host', type=str, default=None, required=(redis_flag in sys.argv),
+        parser.add_argument('--redis_host', type=str, default=os.getenv(cls.HOST_ENV_KEY, '127.0.0.1'),
                             help=f'Redis hosting server ip. Possible to use ENV var {cls.HOST_ENV_KEY}.')
-        parser.add_argument('--redis_port', type=int, default=None, required=False,
+        parser.add_argument('--redis_port', type=int, default=os.getenv(cls.PORT_ENV_KEY, 6379),
                             help=f'Redis server port. Possible to use ENV var {cls.PORT_ENV_KEY}.')
-        parser.add_argument('--redis_passwd', type=str, default=None, required=False,
+        parser.add_argument('--redis_passwd', type=str, default=os.getenv(cls.PASSWD_ENV_KEY),
                             help=f'Redis server ip. Possible to use ENV var {cls.PASSWD_ENV_KEY}.')
 
         parser.add_argument('--redis_limit_key', type=str, default='limit', help='Key in Redis to get')

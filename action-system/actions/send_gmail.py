@@ -114,7 +114,7 @@ class Gmail:
 
         join_with_space = partial(JoinNargsCustomAction, join_with=' ')
 
-        parser.add_argument('--gmail_subject', default='Python Automatic Gmail Notification', nargs='+', required=False,
+        parser.add_argument('--gmail_subject', default='VSPU notification system', nargs='+', required=False,
                             type=str,
                             action=join_with_space,
                             help='Limit line value')

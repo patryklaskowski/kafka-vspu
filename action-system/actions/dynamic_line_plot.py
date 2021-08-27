@@ -88,7 +88,7 @@ class DynamicLinePlot:
             # Limit value text annotation
             last_x, last_lim_y = len(self.y) - 1, self.limit_values[-1]
             plt.scatter(last_x, last_lim_y)
-            plt.text(last_x, last_lim_y, f'value: {self.y[-1]}', size=self.label_font_size)
+            plt.text(last_x, last_lim_y, f'value: {self.limit_values[-1]}', size=self.label_font_size)
 
             recently_max_lim = max(self.limit_values)
             y_upper_lim = int(recently_max_lim + recently_max_lim * self.margin) \
