@@ -12,41 +12,41 @@
 
 ---
 
-## Overview:
+# Overview:
 This is notification system for Video Stream Processing Unit (VSPU).<br>
 The purpose is to build solution that based on any **data source** is able to **process** received data and finally trigger custom **actions**.
 Each part is build in such way that custom data sources, data processors and actions may be implemented.
 Here You have provided few examples.
 
-### Action system
-- [x] **Live plot (matplotlib):**<br>
-      Plots stream of incoming data provided by callable object.<br>
-      Possible to set limit value (both static and dynamic).<br>
-      Based on matplotlib.<br>
-- [x] **Email notificaiton (Gmail SMTP):**<br>
-      Send email based on incoming data stream and either dynamic or static limit value.<br>
-      System sources data from Kafka topic and compare to current limit.<br>
-      If data value exceeds limit value, sends email.<br>
-- [x] **Database for IPC**:<br>
-      Redis database for quick inter process communication.<br>
-      Modifying vaiables by external user made available.<br>
-      This component is optional.<br>
-### Data  processor (Kafka Streams)
-- [x] **SumTheAge**:<br>
-      Kafka Streams and Java application.<br>
-      Recieves data from one Kafka topic, process and pass to another Kafka topic.<br>
-      Values are filtered and then sum off all `age` key is evaluated in real time as data is coming.<br> 
-### Data source
-- [x] **Mockup script**:<br>
-      Python script that pushes data to Kafka topic. Data is flat JSON type in format of (string_key, JSON_value).
+## Action system
+- **Live plot (matplotlib):**<br>
+    Plots stream of incoming data provided by callable object.<br>
+    Possible to set limit value (both static and dynamic).<br>
+    Based on matplotlib.<br>
+- **Email notificaiton (Gmail SMTP):**<br>
+    Send email based on incoming data stream and either dynamic or static limit value.<br>
+    System sources data from Kafka topic and compare to current limit.<br>
+    If data value exceeds limit value, sends email.<br>
+- **Database for IPC**:<br>
+    Redis database for quick inter process communication.<br>
+    Modifying vaiables by external user made available.<br>
+    This component is optional.<br>
+## Data  processor (Kafka Streams)
+- **SumTheAge**:<br>
+    Kafka Streams and Java application.<br>
+    Recieves data from one Kafka topic, process and pass to another Kafka topic.<br>
+    Values are filtered and then sum off all `age` key is evaluated in real time as data is coming.<br> 
+## Data source
+- **Mockup script**:<br>
+    Python script that pushes data to Kafka topic. Data is flat JSON type in format of (string_key, JSON_value).
       
-### Additional
-- [x] **Kafka CLI consumer**:<br>
-      To visulize data flow through Kafka server.
+## Additional
+- **Kafka CLI consumer**:<br>
+    To visulize data flow through Kafka server.
 
 ---
 
-## High-level notification system architecture
+# High-level notification system architecture
 
 <p align="center">
   <img src="visualizations/high-level-notification-system-architecture/high-level-notification-system-architecture.png"
@@ -55,6 +55,13 @@ Here You have provided few examples.
 </p>
 
 ---
+
+# Getting Started
+
+-------
+-------
+-------
+TODO
 
 ## Prepare Environment
 
