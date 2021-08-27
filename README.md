@@ -24,9 +24,9 @@ List suggests the order to run the software.<br>
 Kafka CLI Consumers are optional elements set for visualizational purpose.<br>
 
 <p align="center">
-  <img src="visualizations/high-level-architecture/high-level-architecture.png"
-       alt="high-level-architecture.png"
-       width=80%>
+  <img src="visualizations/high-level-notification-system-architecture/high-level-notification-system-architecture.png"
+       alt="visualization of high-level-notification-system-architecture"
+       width=100%>
 </p>
 
 ---
@@ -121,7 +121,7 @@ python3 -m pip install -r requirements.txt &&
 python3 live_plot_consumer.py --limit 10000 --window 50 --interval 300
 ```
 
-### 5. Email/SMS Notification Python Consumer
+### 5. Email Notification Python Consumer
 ```bash
 ```
 
