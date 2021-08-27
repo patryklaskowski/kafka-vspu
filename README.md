@@ -47,7 +47,6 @@ Here You have provided few examples.
 ---
 
 # High-level notification system architecture
-
 <p align="center">
   <img src="visualizations/high-level-notification-system-architecture/high-level-notification-system-architecture.png"
        alt="visualization of high-level-notification-system-architecture"
@@ -56,25 +55,21 @@ Here You have provided few examples.
 
 ---
 
+# Runtime visualization
+<p align="center">
+  <img src="visualizations/screen-record.gif"
+       alt="screen-record.gif"
+       width=100%>
+</p>
+
+---
+
 # Getting Started
 
--------
--------
--------
-TODO
+## 1) Prepare Kafka Server
+> **_NOTE:_** It is assumed that Kafka Server is up and running. Also it's bin directory added to path
 
-## Prepare Environment
-
-### Clone repository
-```bash
-git clone https://github.com/patryklaskowski/kafka-vspu.git &&
-cd kafka-vspu
-```
-
-### Create Kafka topics using Kafka CLI
-> **_NOTE:_**  Assumed that Kafka is installed and it's bin directory is added to path
-
-#### Topic: example.001
+#### a) Create topic: example.001
 ```bash
 kafka-topics.sh --zookeeper 127.0.0.1:2181 \
 --topic example.001 \
@@ -83,7 +78,7 @@ kafka-topics.sh --zookeeper 127.0.0.1:2181 \
 --replication-factor 1
 ```
 
-#### Topic: example.001.age.sum
+#### b) Topic: example.001.age.sum
 ```bash
 kafka-topics.sh --zookeeper 127.0.0.1:2181 \
 --topic example.001.age.sum \
@@ -92,12 +87,48 @@ kafka-topics.sh --zookeeper 127.0.0.1:2181 \
 --replication-factor 1
 ```
 
----
-## Run software
+## 2) Prepare Redis database
 
-### 1. Kafka CLI example.001 Consumer (group: example.001.vis.app)
+#### a) Using Docker
 ```bash
-kafka-console-consumer.sh --bootstrap-server 149.81.197.180:9092 \
+docker run -d --name redis-db -p 6379:6379 redis redis-server --requirepass "password"
+```
+> **_NOTE:_** To manipulate Redis data (e.g. change value for 'limit' key to 150):
+> ```
+> docker exec -it redis-db bash
+> redis-cli -a password
+> SET limit 150
+> ```
+
+## 3) Clone repository
+```bash
+git clone https://github.com/patryklaskowski/vspu-notification-system.git &&
+cd vspu-notification-system
+```
+
+## 4) Run action system
+### a). Kafka CLI Consumer (topic: example.001.age.sum, group: example.001.age.sum.vis.app)
+```bash
+kafka-console-consumer.sh --bootstrap-server 127.0.0.1:9092 \
+--topic example.001.age.sum \
+--group example.001.age.sum.vis.app \
+--from-beginning \
+--formatter kafka.tools.DefaultMessageFormatter \
+--property print.key=true \
+--property print.value=true \
+--property key.deserializer=org.apache.kafka.common.serialization.StringDeserializer \
+--property value.deserializer=org.apache.kafka.common.serialization.IntegerDeserializer
+```
+
+## 5) Run data processor
+#### a) ...
+```bash
+```
+
+## 6) Run data producer
+#### a) Kafka CLI Consumer (topic:example.001, group: example.001.vis.app)
+```bash
+kafka-console-consumer.sh --bootstrap-server 127.0.0.1:9092 \
 --topic example.001 \
 --group example.001.vis.app \
 --from-beginning \
@@ -108,9 +139,23 @@ kafka-console-consumer.sh --bootstrap-server 149.81.197.180:9092 \
 --property value.deserializer=org.apache.kafka.common.serialization.StringDeserializer
 ```
 
+---
+
+
+TODO
+
+
+
+
+
+---
+## Run software
+
+
+
 > **_NOTE:_**  To reset group offset to very beginning
 > ```bash
-> kafka-consumer-groups.sh --bootstrap-server 149.81.197.180:9092 \
+> kafka-consumer-groups.sh --bootstrap-server 127.0.0.1:9092 \
 > --topic example.001 \
 > --group example.001.vis.app \
 > --reset-offsets --to-earliest \
@@ -122,22 +167,11 @@ kafka-console-consumer.sh --bootstrap-server 149.81.197.180:9092 \
 java -jar kafka-streams/sumTheAge-kafka-streams/target/sumTheAge-kafka-streams-1.0-jar-with-dependencies.jar
 ```
 
-### 3. Kafka CLI example.001.age.sum Consumer (group: example.001.age.sum.vis.app)
-```bash
-kafka-console-consumer.sh --bootstrap-server 149.81.197.180:9092 \
---topic example.001.age.sum \
---group example.001.age.sum.vis.app \
---from-beginning \
---formatter kafka.tools.DefaultMessageFormatter \
---property print.key=true \
---property print.value=true \
---property key.deserializer=org.apache.kafka.common.serialization.StringDeserializer \
---property value.deserializer=org.apache.kafka.common.serialization.IntegerDeserializer
-```
+
 
 > **_NOTE:_**  To reset group offset to very beginning
 > ```bash
-> kafka-consumer-groups.sh --bootstrap-server 149.81.197.180:9092 \
+> kafka-consumer-groups.sh --bootstrap-server 127.0.0.1:9092 \
 > --topic example.001.age.sum \
 > --group example.001.age.sum.vis.app \
 > --reset-offsets --to-earliest \
@@ -166,11 +200,7 @@ python3 -m pip install -r requirements.txt &&
 python3 kafka-python-sumTheAge-producer.py --min -5 --max 7 --sleep 0.2 -n 200
 ```
 
-<p align="center">
-  <img src="visualizations/screen-record.gif"
-       alt="screen-record.gif"
-       width=90%>
-</p>
+
 
 ---
 
