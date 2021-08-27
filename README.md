@@ -1,7 +1,6 @@
 # vspu-notification-system
-Notification system for Video Stream Processing Unit<br><br>
-<b>Process data in real time to finally trigger data-driven actions.</b>
 
+> <br>**Process stream of data in real time manner and trigger data-driven actions.**<br><br>
 
 [![Python](https://img.shields.io/badge/Python-3.7-FFD43B?style=flat&logo=Python&logoColor=FFD43B)](https://www.python.org/)
 [![Java](https://img.shields.io/badge/Java-1.8-ED8B00?style=flat&logo=Java&logoColor=white)](https://java.com/)
@@ -14,19 +13,36 @@ Notification system for Video Stream Processing Unit<br><br>
 ---
 
 ## Overview:
+This is notification system for Video Stream Processing Unit (VSPU).<br>
+The purpose is to build solution that based on any **data source** is able to **process** received data and finally trigger custom **actions**.
+Each part is build in such way that custom data sources, data processors and actions may be implemented.
+Here You have provided few examples.
+
 ### Action system
-- [x] Live matplotlib plot
-- [x] Email notificaiton (Gmail SMTP):<br>
-      Send email based on incoming data stream and either dynamic or static limit value.
-      System sources data from Kafka topic and compare to current limit.
-      If data value exceeds limit value, sends email.
-- [x] Database for IPC<br>
-blah blah
+- [x] **Live plot (matplotlib):**<br>
+      Plots stream of incoming data provided by callable object.<br>
+      Possible to set limit value (both static and dynamic).<br>
+      Based on matplotlib.<br>
+- [x] **Email notificaiton (Gmail SMTP):**<br>
+      Send email based on incoming data stream and either dynamic or static limit value.<br>
+      System sources data from Kafka topic and compare to current limit.<br>
+      If data value exceeds limit value, sends email.<br>
+- [x] **Database for IPC**:<br>
+      Redis database for quick inter process communication.<br>
+      Modifying vaiables by external user made available.<br>
+      This component is optional.<br>
 ### Data  processor (Kafka Streams)
-- [x] SumTheAge
-- [ ] 
+- [x] **SumTheAge**:<br>
+      Kafka Streams and Java application.<br>
+      Recieves data from one Kafka topic, process and pass to another Kafka topic.<br>
+      Values are filtered and then sum off all `age` key is evaluated in real time as data is coming.<br> 
 ### Data source
-- [x] Script simulates input data
+- [x] **Mockup script**:<br>
+      Python script that pushes data to Kafka topic. Data is flat JSON type in format of (string_key, JSON_value).
+      
+### Additional
+- [x] **Kafka CLI consumer**:<br>
+      To visulize data flow through Kafka server.
 
 ---
 
