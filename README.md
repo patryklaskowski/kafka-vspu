@@ -1,12 +1,15 @@
-# kafka-vspu
-Kafka Architecture for Video Stream Processing Unit
+# vspu-notification-system
+Notification system for Video Stream Processing Unit<br><br>
+<b>Process data in real time to finally trigger data-driven actions.</b>
+
 
 [![Python](https://img.shields.io/badge/Python-3.7-FFD43B?style=flat&logo=Python&logoColor=FFD43B)](https://www.python.org/)
 [![Java](https://img.shields.io/badge/Java-1.8-ED8B00?style=flat&logo=Java&logoColor=white)](https://java.com/)
 [![Apache_Kafka](https://img.shields.io/badge/Apache_Kafka-2.8-231F20?style=flat&logo=Apache-Kafka&logoColor=white)](https://kafka.apache.org/)
 [![Apache_Maven](https://img.shields.io/badge/Apache_Maven-4.0-C71A36?style=flat&logo=Apache-Maven&logoColor=white)](https://maven.apache.org/)
+[![Redis](https://img.shields.io/badge/Redis-6.2-D82C20?style=flat&logo=Redis&logoColor=white)](https://redis.io/)
+[![Docker](https://img.shields.io/badge/Docker-6.2-384d54?style=flat&logo=Docker&logoColor=0db7ed)](https://www.docker.com/)
 ![IOS](https://img.shields.io/badge/iOS-000000?style=flat&logo=ios&logoColor=white)
-
 
 ---
 
