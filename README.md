@@ -14,17 +14,23 @@ Notification system for Video Stream Processing Unit<br><br>
 ---
 
 ## Overview:
-Architecture has 6 components:
-1. Kafka CLI Consumer<br>- Connected to raw data topic "example.001"
-2. **"sumTheAge" Kafka Streams Application**<br>- Process the data from topic "example.001"
-3. Kafka CLI Consumer<br>- Connected to processed data topic "example.001.age.sum"
-4. **Live Plot Python Consumer**<br>- Connected to processed data topic "example.001.age.sum"
-5. **Email/SMS Notification Python Consumer**<br>- Connected to processed data topic "example.001.age.sum"
-6. **Python Data Producer Mockup**<br>- Simulates input data
+### Action system
+- [x] Live matplotlib plot
+- [x] Email notificaiton (Gmail SMTP):<br>
+      Send email based on incoming data stream and either dynamic or static limit value.
+      System sources data from Kafka topic and compare to current limit.
+      If data value exceeds limit value, sends email.
+- [x] Database for IPC<br>
+blah blah
+### Data  processor (Kafka Streams)
+- [x] SumTheAge
+- [ ] 
+### Data source
+- [x] Script simulates input data
 
-List suggests the order to run the software.<br>
-**Bolded** elements are crucial workflow components.<br>
-Kafka CLI Consumers are optional elements set for visualizational purpose.<br>
+---
+
+## High-level notification system architecture
 
 <p align="center">
   <img src="visualizations/high-level-notification-system-architecture/high-level-notification-system-architecture.png"
