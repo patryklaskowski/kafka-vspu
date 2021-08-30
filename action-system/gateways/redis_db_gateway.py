@@ -19,7 +19,6 @@ pip install redis
 import argparse
 import time
 import os
-import sys
 
 import redis
 
