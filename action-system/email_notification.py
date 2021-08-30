@@ -8,21 +8,16 @@ If data value exceeds limit value, sends email.
 """
 
 import argparse
-
-BOOTSTRAP_SERVER = '149.81.197.180:9092'
-TOPIC = 'example.001.age.sum'
-GROUP_ID = 'gmail-app'
-
-conf = {
-    'bootstrap.servers': BOOTSTRAP_SERVER,
-    'group.id': GROUP_ID,
-    'auto.offset.reset': 'earliest',
-    'enable.auto.commit': False,
-}
+import os
 
 
 def create_parser():
     parser = argparse.ArgumentParser()
+
+    bootstrap_server_env_key = 'BOOTSTRAP_SERVER'
+    parser.add_argument('--bootstrap_server', type=str, default=os.getenv(bootstrap_server_env_key, '127.0.0.1:9092'),
+                        help=f'Kafka bootstrap server e.g. 127.0.0.1:9092. '
+                             f'Possible of use {bootstrap_server_env_key} env variable.')
 
     parser.add_argument('--interval_s', type=int, default=1,
                         choices=[1, 5, 10, 60],
@@ -62,6 +57,17 @@ if __name__ == '__main__':
         limit_func = partial(redis_gateway.get, key=args.redis_limit_key, default=None, map_type=int)
     else:
         limit_func = lambda: args.limit
+
+    BOOTSTRAP_SERVER = args.bootstrap_server
+    TOPIC = 'example.001.age.sum'
+    GROUP_ID = 'gmail-app'
+
+    conf = {
+        'bootstrap.servers': BOOTSTRAP_SERVER,
+        'group.id': GROUP_ID,
+        'auto.offset.reset': 'earliest',
+        'enable.auto.commit': False,
+    }
 
     try:
 

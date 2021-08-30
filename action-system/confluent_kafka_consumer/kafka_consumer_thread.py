@@ -147,7 +147,9 @@ class MyKafkaConsumerThread(Thread):
 
 if __name__ == '__main__':
 
-    BOOTSTRAP_SERVER = '149.81.197.180:9092'
+    import os
+
+    BOOTSTRAP_SERVER = os.getenv('BOOTSTRAP_SERVER') or '127.0.0.1:9092'
     TOPIC = 'example.001.age.sum'
     GROUP_ID = 'graph-app'
 

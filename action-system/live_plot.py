@@ -9,22 +9,18 @@ Based on matplotlib
 """
 
 import argparse
-
-BOOTSTRAP_SERVER = '149.81.197.180:9092'
-TOPIC = 'example.001.age.sum'
-GROUP_ID = 'graph-app'
-
-conf = {
-    'bootstrap.servers': BOOTSTRAP_SERVER,
-    'group.id': GROUP_ID,
-    'auto.offset.reset': 'earliest',
-    'enable.auto.commit': False,
-}
+import os
 
 
 def create_parser():
     """Parameters specific for live plot"""
     parser = argparse.ArgumentParser()
+
+    bootstrap_server_env_key = 'BOOTSTRAP_SERVER'
+    parser.add_argument('--bootstrap_server', type=str, default=os.getenv(bootstrap_server_env_key, '127.0.0.1:9092'),
+                        help=f'Kafka bootstrap server e.g. 127.0.0.1:9092. '
+                             f'Possible of use {bootstrap_server_env_key} env variable.')
+
     parser.add_argument('--limit', type=int, default=100, help='Static limit line value')
     parser.add_argument('--window', type=int, default=20, help='Window size. Number of visible data points')
     parser.add_argument('--interval_ms', type=int, default=500, help='Wait milliseconds between plot refresh')
@@ -53,6 +49,17 @@ if __name__ == '__main__':
         redis_gateway = RedisGateway(args.redis_host, args.redis_port, args.redis_passwd)
         get_limit_from_redis = partial(redis_gateway.get, args.redis_limit_key)
         limit_func = get_limit_from_redis
+
+    BOOTSTRAP_SERVER = args.bootstrap_server
+    TOPIC = 'example.001.age.sum'
+    GROUP_ID = 'graph-app'
+
+    conf = {
+        'bootstrap.servers': BOOTSTRAP_SERVER,
+        'group.id': GROUP_ID,
+        'auto.offset.reset': 'earliest',
+        'enable.auto.commit': False,
+    }
 
     try:
         # Kafka consumer to establish incoming data
