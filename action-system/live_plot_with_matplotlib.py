@@ -32,7 +32,8 @@ if __name__ == '__main__':
 
     from functools import partial
 
-    from actions.dynamic_line_plot import DynamicLinePlot
+    from common import log
+    from actions.matplotlib_live_plot.live_plot import DynamicLinePlot
     from confluent_kafka_consumer.kafka_consumer_thread import MyKafkaConsumerThread
     from gateways.redis_db_gateway import RedisGateway
 
@@ -61,6 +62,9 @@ if __name__ == '__main__':
         'enable.auto.commit': False,
     }
 
+    for key, val in conf.items():
+        log(f'conf   {key}={val}')
+
     try:
         # Kafka consumer to establish incoming data
         consumer_t = MyKafkaConsumerThread(TOPIC, conf, poll_timeout_s=1,
@@ -78,7 +82,7 @@ if __name__ == '__main__':
         live_plot.run()
 
     except KeyboardInterrupt:
-        print('Keyboard interrupt, closing...')
+        log('Keyboard interrupt, closing...')
     except BaseException as e:
         raise Exception('Unknown exception occurred.') from e
     finally:
@@ -86,4 +90,4 @@ if __name__ == '__main__':
             consumer_t.stop()
             consumer_t.join(timeout=10)
 
-    print('\nDone!')
+    log('\nDone!')
