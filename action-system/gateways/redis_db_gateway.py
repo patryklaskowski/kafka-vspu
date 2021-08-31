@@ -28,6 +28,8 @@ class RedisGateway:
     HOST_ENV_KEY = 'REDIS_HOST'
     PORT_ENV_KEY = 'REDIS_PORT'
     PASSWD_ENV_KEY = 'REDIS_PASSWD'
+    REDIS_FLAG_ENV_KEY = 'REDIS_FLAG'
+    REDIS_LIMIT_KEY_ENV_KEY = 'REDIS_LIMIT_KEY'
 
     def __init__(self, host=None, port=None, password=None):
         self.host = host
@@ -67,7 +69,8 @@ class RedisGateway:
         parser = argparse.ArgumentParser()
 
         redis_flag = '--redis'
-        parser.add_argument(redis_flag, action='store_true', required=False,
+        parser.add_argument(redis_flag, action='store_true',
+                            default=True if os.getenv(cls.REDIS_FLAG_ENV_KEY) else False,
                             help='Redis flag to help determine if Redis connection is desired.')
 
         parser.add_argument('--redis_host', type=str, default=os.getenv(cls.HOST_ENV_KEY, '127.0.0.1'),
@@ -77,7 +80,8 @@ class RedisGateway:
         parser.add_argument('--redis_passwd', type=str, default=os.getenv(cls.PASSWD_ENV_KEY),
                             help=f'Redis server ip. Possible to use ENV var {cls.PASSWD_ENV_KEY}.')
 
-        parser.add_argument('--redis_limit_key', type=str, default='limit', help='Key in Redis to get')
+        parser.add_argument('--redis_limit_key', type=str, default=os.getenv(cls.REDIS_LIMIT_KEY_ENV_KEY, 'limit'),
+                            help='Key in Redis to get')
 
         return parser
 
@@ -88,9 +92,9 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     # From args or read from ENV variables
-    host = args.redis_host or os.getenv(RedisGateway.HOST_ENV_KEY, '127.0.0.1')
-    port = args.redis_port or os.getenv(RedisGateway.PORT_ENV_KEY, 6379)
-    passwd = args.redis_passwd or os.getenv(RedisGateway.PASSWD_ENV_KEY)
+    host = args.redis_host
+    port = args.redis_port
+    passwd = args.redis_passwd
 
     rg = RedisGateway(host, port, passwd)
     print(rg)
