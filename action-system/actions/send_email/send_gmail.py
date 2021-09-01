@@ -28,6 +28,11 @@ class Gmail:
     USER_ENV_KEY = 'GMAIL_USER'
     PASSWD_ENV_KEY = 'GMAIL_PASSWD'
 
+    GMAIL_TO_ENV_KEY = 'GMAIL_TO'
+    GMAIL_SUBJECT_ENV_KEY = 'GMAIL_SUBJECT'
+    GMAIL_MESSAGE_ENV_KEY = 'GMAIL_MESSAGE'
+    GMAIL_MESSAGE_FROM_FILE_ENV_KEY = 'GMAIL_MESSAGE_FROM_FILE'
+
     date_format = '%m/%d/%Y %H:%M:%S'
 
     def __init__(self, user=None, password=None):
@@ -95,39 +100,49 @@ class Gmail:
 
         parser = argparse.ArgumentParser()
 
-        parser.add_argument('--gmail_user', default=os.getenv(cls.USER_ENV_KEY),
-                            type=str,
-                            action=None,
+        # User and password required when env variable weren't set
+        parser.add_argument('--gmail_user', type=str,
+                            default=os.getenv(cls.USER_ENV_KEY),
+                            required=not already_defined_env_var(cls.USER_ENV_KEY),
                             help=f'Gmail account username. By default reads from "{cls.USER_ENV_KEY}" env variable.')
-        parser.add_argument('--gmail_passwd', default=os.getenv(cls.PASSWD_ENV_KEY),
-                            type=str,
-                            action=None,
+        parser.add_argument('--gmail_passwd', type=str,
+                            default=os.getenv(cls.PASSWD_ENV_KEY),
+                            required=not already_defined_env_var(cls.PASSWD_ENV_KEY),
                             help=f'Gmail account password. By default reads from "{cls.PASSWD_ENV_KEY}" env variable.')
 
+        # Required only when env variable wasn't set
         join_with_comma = partial(JoinNargsCustomAction, join_with=', ')
-
-        parser.add_argument('--gmail_to', default=None, nargs='+', required=True,
-                            type=str,
+        parser.add_argument('--gmail_to', nargs='+', type=str,
+                            default=os.getenv(cls.GMAIL_TO_ENV_KEY),
+                            required=not already_defined_env_var(cls.GMAIL_TO_ENV_KEY),
                             action=join_with_comma,
                             help='Receiver address(es). '
-                                 'If multiple addresses type them in one after another using space to separate them.')
+                                 'If multiple addresses type them in one after another using space to separate them.'
+                                 f'By default reads from "{cls.GMAIL_TO_ENV_KEY}" env variable.')
 
+        # Required only when env variable wasn't set
         join_with_space = partial(JoinNargsCustomAction, join_with=' ')
-
-        parser.add_argument('--gmail_subject', default='VSPU notification system', nargs='+', required=False,
-                            type=str,
+        parser.add_argument('--gmail_subject', nargs='+', type=str,
+                            default=os.getenv(cls.GMAIL_SUBJECT_ENV_KEY),
+                            required=not already_defined_env_var(cls.GMAIL_SUBJECT_ENV_KEY),
                             action=join_with_space,
-                            help='Limit line value')
+                            help='Message subject'
+                                 f'By default reads from "{cls.GMAIL_SUBJECT_ENV_KEY}" env variable.')
 
-        body_group = parser.add_mutually_exclusive_group(required=True)
-        body_group.add_argument('--gmail_message', default=None, nargs='+',
-                                type=str,
+        # Mutually exclusive - one argument required when none was defined in env variables
+        mutually_exclusive = (cls.GMAIL_MESSAGE_ENV_KEY, cls.GMAIL_MESSAGE_FROM_FILE_ENV_KEY)
+        body_group = parser.add_mutually_exclusive_group(
+            required=not any(already_defined_env_var(key) for key in mutually_exclusive))
+        body_group.add_argument('--gmail_message', nargs='+', type=str,
+                                default=os.getenv(cls.GMAIL_MESSAGE_ENV_KEY),
                                 action=join_with_space,
-                                help='Message body.')
-        body_group.add_argument('--gmail_message_from_file', default=None,
-                                type=str,
+                                help='Message body.'
+                                     f'By default reads from "{cls.GMAIL_MESSAGE_ENV_KEY}" env variable.')
+        body_group.add_argument('--gmail_message_from_file', type=str,
+                                default=read_text_file(os.getenv(cls.GMAIL_MESSAGE_FROM_FILE_ENV_KEY)),
                                 action=ReadFileCustomAction,
-                                help='Text file storing message body.')
+                                help='Path to text file storing message body.'
+                                     f'By default reads from "{cls.GMAIL_MESSAGE_FROM_FILE_ENV_KEY}" env variable.')
 
         return parser
 
@@ -145,13 +160,29 @@ class ReadFileCustomAction(argparse.Action):
             with open(values, 'r') as f:
                 new_values = f.read()
         except FileNotFoundError:
-            raise FileNotFoundError(f'File {values} does not exist.') from None
+            raise FileNotFoundError(f'Cannot find {values} in current dir ({os.path.abspath(os.curdir)}).') from None
         except IOError:
             raise IOError(f'Error when trying to open {values}.') from None
         except BaseException as e:
             raise Exception('Undefined exception occured.') from e
 
         setattr(namespace, self.dest, new_values)
+
+
+def read_text_file(path):
+    if not path:
+        return None
+    if os.path.isfile(path):
+        with open(path, 'r') as f:
+            txt = f.read()
+        return txt
+    raise FileNotFoundError(f'Provided path ({path}) is not correct.')
+
+
+def already_defined_env_var(key):
+    """Returns boolean if key is defined env variable"""
+    value = os.getenv(key, None)
+    return True if value else False
 
 
 if __name__ == '__main__':
