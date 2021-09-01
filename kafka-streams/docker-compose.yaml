@@ -1,0 +1,9 @@
+services:
+  sum-the-age:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - STREAMS_BOOTSTRAP_SERVERS  # e.g. 127.0.0.1:9092
+      - STREAMS_INPUT_TOPIC  # e.g. example.001
+      - STREAMS_OUTPUT_TOPIC  # example.001.age.sum

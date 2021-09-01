@@ -14,18 +14,47 @@ import java.util.Properties;
 
 public class SumTheAge {
 
-    final static String BOOTSTRAP_SERVERS = "149.81.197.180:9092";
+    // Read from environmental variables
+    final static String BOOTSTRAP_SERVERS_ENV_KEY = "STREAMS_BOOTSTRAP_SERVERS";
+    final static String BOOTSTRAP_SERVERS_DEFAULT = "127.0.0.1:9092";
+    final static String BOOTSTRAP_SERVERS = System.getenv().getOrDefault(BOOTSTRAP_SERVERS_ENV_KEY, BOOTSTRAP_SERVERS_DEFAULT);
+
+    final static String INPUT_TOPIC_ENV_KEY = "STREAMS_INPUT_TOPIC";
+    final static String INPUT_TOPIC_DEFAULT = "example.001";
+    final static String INPUT_TOPIC = System.getenv().getOrDefault(INPUT_TOPIC_ENV_KEY, INPUT_TOPIC_DEFAULT);
+
+    final static String OUTPUT_TOPIC_ENV_KEY = "STREAMS_OUTPUT_TOPIC";
+    final static String OUTPUT_TOPIC_DEFAULT = "example.001.age.sum";
+    final static String OUTPUT_TOPIC = System.getenv().getOrDefault(OUTPUT_TOPIC_ENV_KEY, OUTPUT_TOPIC_DEFAULT);;
+
+
     final static String GROUP_ID = "sum-lambda-example";
     final static String UNIQUE_CLIENT_ID = "sum-lambda-example-client-001";
-    final static String INPUT_TOPIC = "example.001";
-    final static String OUTPUT_TOPIC = "example.001.age.sum";
 
     // In order to overwrite default (properties) serialization / deserialization
     final static Serde<String> stringSerde = Serdes.String();
     final static Serde<Integer> integerSerde = Serdes.Integer();
 
+    final static Integer SLEEP_MS = 5000;
+
     public static void main(String[] args) {
+
         System.out.println("Welcome in SumTheAge Kafka Streams Solution!");
+
+        System.out.println(
+                "\n\n"+
+                "BOOTSTRAP_SERVERS (env key " + BOOTSTRAP_SERVERS_ENV_KEY + "): " + BOOTSTRAP_SERVERS + "\n" +
+                "INPUT_TOPIC: (env key " + INPUT_TOPIC_ENV_KEY + "): " + INPUT_TOPIC + "\n" +
+                "OUTPUT_TOPIC: (env key " + OUTPUT_TOPIC_ENV_KEY + "): " + OUTPUT_TOPIC +
+                "\n\n");
+
+        try {
+            System.out.println("Sleeping " + SLEEP_MS + "ms...");
+            Thread.sleep(SLEEP_MS);
+        }
+        catch(InterruptedException ex) {
+            Thread.currentThread().interrupt();
+        }
 
         Logger logger = LoggerFactory.getLogger(SumTheAge.class.getName());
 
