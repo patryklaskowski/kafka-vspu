@@ -1,0 +1,13 @@
+services:
+  # TODO: Save image on DockerHub. Run without Dockerfiles
+  sum-the-age-mockup:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    stdin_open: true  # docker run -i
+    tty: true  # docker run -t
+    volumes:
+      - ./config.yaml:/data-producer/config.yaml
+
+# To run interactive session use
+# docker-compose run sum-the-age-mockup

@@ -1,0 +1,9 @@
+sumTheAge-mockup:
+  BOOTSTRAP_SERVER: 127.0.0.1:9092
+  KAFKA_TOPIC: example.001
+
+  MANUAL_FLAG: True
+  N_MESSAGES: # e.g. 1  # Relevant if MANUAL_FLAG=False
+  SLEEP: # e.g. 1  # Relevant if MANUAL_FLAG=False
+  MIN_RANDOM_VAL: # e.g. 0  # Relevant if MANUAL_FLAG=False
+  MAX_RANDOM_VAL: # e.g. 10  # Relevant if MANUAL_FLAG=False

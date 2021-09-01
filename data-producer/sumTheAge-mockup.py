@@ -11,35 +11,56 @@ import random
 import argparse
 import os
 
-from datetime import datetime
+from kafka.errors import NoBrokersAvailable
 from kafka import KafkaProducer
 
-from common import KafkaDeliveryCallback
+from common import KafkaDeliveryCallback, log, export_env_var_from, CONFIG_FILE
 
 
-def log(msg, date_format='%m/%d/%Y %H:%M:%S', return_msg=False):
-    message = f'[{datetime.now().strftime(date_format)}] {msg}'
-    if return_msg:
-        return message
-    print(message)
+BOOTSTRAP_SERVER_ENV_KEY = 'BOOTSTRAP_SERVER'
+KAFKA_TOPIC_ENV_KEY = 'KAFKA_TOPIC'
+
+MANUAL_FLAG_ENV_EKY = 'MANUAL_FLAG'
+N_MESSAGES_ENV_KEY = 'N_MESSAGES'
+SLEEP_ENV_KEY = 'SLEEP'
+MIN_RANDOM_VAL_ENV_KEY = 'MIN_RANDOM_VAL'
+MAX_RANDOM_VAL_ENV_KEY = 'MAX_RANDOM_VAL'
 
 
 def parse_args():
     parser = argparse.ArgumentParser()
 
-    bootstrap_server_env_key = 'BOOTSTRAP_SERVER'
-    parser.add_argument('--bootstrap_server', type=str, default=os.getenv(bootstrap_server_env_key, '127.0.0.1:9092'),
+    parser.add_argument('--bootstrap_server', type=str,
+                        default=os.getenv(BOOTSTRAP_SERVER_ENV_KEY, '127.0.0.1:9092'),
                         help=f'Kafka bootstrap server e.g. 127.0.0.1:9092. '
-                             f'Possible of use {bootstrap_server_env_key} env variable.')
+                             f'Possible of use {BOOTSTRAP_SERVER_ENV_KEY} env variable.')
+    parser.add_argument('--kafka_topic', type=str,
+                        default=os.getenv(KAFKA_TOPIC_ENV_KEY),
+                        help=f'Kafka topic to connect.'
+                             f'Possible of use {KAFKA_TOPIC_ENV_KEY} env variable.')
 
     # Manual
-    parser.add_argument('--manual', action='store_true', required=False,
-                        help='Flag to determine manual data producing')
+    parser.add_argument('--manual', action='store_true',
+                        default=True if os.getenv(MANUAL_FLAG_ENV_EKY) else False,
+                        help='Flag to determine manual data producing'
+                             f'Possible of use {MANUAL_FLAG_ENV_EKY} env variable.')
     # or automatic
-    parser.add_argument('--n', type=int, default=20, help='Number of messages to send')
-    parser.add_argument('-s', '--sleep', type=float, default=0.0, help='Time to sleep between sends')
-    parser.add_argument('--min', type=int, default=0, help='Lower bound of random value')
-    parser.add_argument('--max', type=int, default=10, help='Upper bound of random value')
+    parser.add_argument('--n_messages', type=int,
+                        default=os.getenv(N_MESSAGES_ENV_KEY, 20),
+                        help='Number of messages to send.'
+                             f'Possible of use {N_MESSAGES_ENV_KEY} env variable.')
+    parser.add_argument('-s', '--sleep', type=float,
+                        default=os.getenv(SLEEP_ENV_KEY, 0),
+                        help='Time to sleep between sends.'
+                             f'Possible of use {SLEEP_ENV_KEY} env variable.')
+    parser.add_argument('--min_random_val', type=int,
+                        default=os.getenv(MIN_RANDOM_VAL_ENV_KEY, 0),
+                        help='Lower bound of random value.'
+                             f'Possible of use {MIN_RANDOM_VAL_ENV_KEY} env variable.')
+    parser.add_argument('--max_random_val', type=int,
+                        default=os.getenv(MAX_RANDOM_VAL_ENV_KEY, 10),
+                        help='Upper bound of random value.'
+                             f'Possible of use {MAX_RANDOM_VAL_ENV_KEY} env variable.')
 
     return parser.parse_args()
 
@@ -75,8 +96,7 @@ def send_manually_with(producer):
                 .add_callback(f=KafkaDeliveryCallback.print_metadata, value=value, before=log(msg='', return_msg=True))\
                 .add_errback(f=KafkaDeliveryCallback.handle_exception, value=value, before=log(msg='', return_msg=True))
 
-            log(f'{str(i).zfill(3)}) value {value} synchronously. Waiting for future.\n'
-                f'{"-" * 42}')
+            log(f'{str(i).zfill(3)}) value {value} synchronously. Waiting for future.')
             future.get(timeout=30)
             i += 1
 
@@ -95,10 +115,15 @@ def send_automatically_with(producer, n, lower_limit, upper_limit, seconds):
 
 if __name__ == '__main__':
 
+    export_env_var_from(CONFIG_FILE)
+
     args = parse_args()
 
+    for key, val in vars(args).items():
+        log(f'args    {key}: {val}')
+
     ##########################################
-    TOPIC = 'example.001'
+    TOPIC = args.kafka_topic
     BOOTSTRAP_SERVER = args.bootstrap_server
     KEY = 'cam-001-example-001'
     ##########################################
@@ -114,7 +139,11 @@ if __name__ == '__main__':
         max_in_flight_requests_per_connection=1
     )
 
-    producer = KafkaProducer(**config)
+    try:
+        producer = KafkaProducer(**config)
+    except NoBrokersAvailable as e:
+        raise NoBrokersAvailable(f'Cannot connect to broker {config["bootstrap_servers"]}.') from None
+
     log(f'Producer connected: {producer.bootstrap_connected()}')
 
     start = time.perf_counter()
