@@ -1,0 +1,8 @@
+Hello,
+
+Example message body for ./email_notification.py
+Use with flag --gmail_message_from_file email_body.txt
+or as env variable GMAIL_MESSAGE_FROM_FILE
+
+Regards,
+Patryk Laskowski
