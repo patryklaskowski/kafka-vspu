@@ -54,7 +54,13 @@ class RedisGateway:
 
     def get(self, key, default=None, map_type=int):
         # TODO: Make it asynchronous. To not make eventual delays caused with network connection
-        return map_type(self.r.get(key)) or default
+        value = None
+        try:
+            value = map_type(self.r.get(key))
+        except TypeError:
+            raise TypeError(f'Value received from Redis db cannot be mapped to {str(map_type)}') from None
+        finally:
+            return value or default
 
     @classmethod
     def create_redis_parser(cls):
