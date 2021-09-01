@@ -1,0 +1,18 @@
+services:
+  # TODO: Save image on DockerHub. Run without Dockerfiles
+
+  live_plot_with_dash:
+    build:
+      context: ./action-system
+      dockerfile: Dockerfile_live_plot_with_dash
+    ports:
+      - 8050:8050
+    volumes:
+      - ./my_config.yaml:/action-system/config.yaml
+
+  email_notification:
+    build:
+      context: ./action-system
+      dockerfile: Dockerfile_email_notification
+    volumes:
+      - ./my_config.yaml:/action-system/config.yaml

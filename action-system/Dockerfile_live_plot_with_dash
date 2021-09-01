@@ -1,0 +1,12 @@
+FROM python:3.7
+
+WORKDIR /action-system
+
+COPY . .
+
+# Plotly Dash default port
+EXPOSE 8050
+
+RUN pip install -r requirements.txt  # --no-cache-dir
+
+ENTRYPOINT ["python", "./live_plot_with_dash.py"]
