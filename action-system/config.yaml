@@ -1,0 +1,30 @@
+redis:
+  REDIS_FLAG: False
+  REDIS_HOST: 127.0.0.1
+  REDIS_PORT: 6379
+  REDIS_PASSWD:
+  REDIS_LIMIT_KEY: limit
+
+gmail:
+  GMAIL_USER:  # e.g. hello@gmail.com
+  GMAIL_PASSWD:  # e.g. password
+
+  GMAIL_TO:  # e.g. reciever1@gmail.com, receiver2@gmail.com
+  GMAIL_SUBJECT: Example subject
+  GMAIL_MESSAGE: Hello World!
+  GMAIL_MESSAGE_FROM_FILE:  # .txt file path
+
+kafka:
+  BOOTSTRAP_SERVER: 127.0.0.1:9092
+
+live_plot_with_dash:
+  DASH_LIVE_PLOT_LIMIT: 200  # Relevant if REDIS_FLAG=False
+  DASH_LIVE_PLOT_WINDOW: 100
+  DASH_LIVE_PLOT_INTERVAL_MS: 300
+
+email_notification:
+  EMAIL_NOTIFICATION_INTERVAL_S: 5
+  EMAIL_NOTIFICATION_LIMIT: 200  # Relevant if REDIS_FLAG=False
+  EMAIL_NOTIFICATION_VERBOSE: True
+
+
