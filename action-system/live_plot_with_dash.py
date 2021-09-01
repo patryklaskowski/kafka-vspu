@@ -60,7 +60,7 @@ if __name__ == '__main__':
     limit_func = None
     if args.redis:
         redis_gateway = RedisGateway(args.redis_host, args.redis_port, args.redis_passwd)
-        limit_func = partial(redis_gateway.get, args.redis_limit_key)
+        limit_func = partial(redis_gateway.get, args.redis_limit_key, default=None, map_type=int)
     elif args.limit:
         limit_func = lambda: args.limit
 

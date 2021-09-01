@@ -26,6 +26,7 @@ class DashDynamicLinePlot:
     }
     common_plot_kwargs = dict(line_shape='linear', mode='lines', connectgaps=True)
     time_format = '%H:%M:%S:%f'
+    DEFAULT_VALUE = 0
 
     def __init__(self, func, limit_func=None, max_len=50, interval_ms=100):
         assert callable(func), 'func argument has to be callable'
@@ -57,10 +58,10 @@ class DashDynamicLinePlot:
 
     def poll_new_data(self):
         """Update data"""
-        self.data['y'].append(self.func() or 0)
+        self.data['y'].append(self.func() or self.DEFAULT_VALUE)
         self.data['x'].append(datetime.now().strftime(self.time_format))
         if self.limit_func:
-            self.data['limit'].append(self.limit_func())
+            self.data['limit'].append(self.limit_func() or self.DEFAULT_VALUE)
 
     def _create_callbacks(self):
         """Creates callbacks"""
