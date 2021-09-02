@@ -104,10 +104,10 @@ if __name__ == '__main__':
             limit = limit_func() or DEFAULT_VALUE
 
             log(f'Recent max {recent_max} (among top{consumer_t.maxlen} values). '
-                f'Limit: {limit}. '
+                f'Limit: {limit}{" <DEFAULT_VALUE>" if limit==DEFAULT_VALUE else ""}. '
                 f'Interval: {args.interval_s} s.')
 
-            if recent_max > limit:
+            if limit != DEFAULT_VALUE and recent_max > limit:
                 gmail.send(to=args.gmail_to,
                            body=args.gmail_message or args.gmail_message_from_file,
                            subject=args.gmail_subject)

@@ -197,8 +197,10 @@ class DashDynamicLinePlot:
                                                     marker=dict(color=f'rgb(255,{flicker},{flicker})', size=10),
                                                     showlegend=False))
             # Limit line plot right-side annotations (shows the latest value)
+            last_limit_value = self.data["limit"][-1]
+            limit_text_value = last_limit_value if last_limit_value != self.DEFAULT_VALUE else "<default>"
             annotations.append(dict(x=len(self.data['limit'])/self.max_len + 0.01, y=self.data['limit'][-1],
-                                    text=f'limit: {self.data["limit"][-1]}',
+                                    text=f'limit: {limit_text_value}',
                                     xref='paper', xanchor='left', yanchor='middle',
                                     font=dict(family='Arial', size=16),
                                     showarrow=False))
