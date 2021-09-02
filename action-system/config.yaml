@@ -1,8 +1,8 @@
 redis:
-  REDIS_FLAG: False
-  REDIS_HOST: 127.0.0.1
+  REDIS_FLAG: True
+  REDIS_HOST: redis  # 127.0.0.1
   REDIS_PORT: 6379
-  REDIS_PASSWD:
+  REDIS_PASSWD: my_password
   REDIS_LIMIT_KEY: limit
 
 gmail:
@@ -17,13 +17,13 @@ gmail:
 kafka:
   BOOTSTRAP_SERVER: 127.0.0.1:9092
 
-live_plot_with_dash:
+dash-live-plot:
   DASH_LIVE_PLOT_LIMIT: 200  # Relevant if REDIS_FLAG=False
   DASH_LIVE_PLOT_WINDOW: 100
   DASH_LIVE_PLOT_INTERVAL_MS: 300
 
-email_notification:
-  EMAIL_NOTIFICATION_INTERVAL_S: 5
+email-notification:
+  EMAIL_NOTIFICATION_INTERVAL_S: 1
   EMAIL_NOTIFICATION_LIMIT: 200  # Relevant if REDIS_FLAG=False
   EMAIL_NOTIFICATION_VERBOSE: True
 

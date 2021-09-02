@@ -1,5 +1,5 @@
 sumTheAge-mockup:
-  BOOTSTRAP_SERVER: 127.0.0.1:9092
+  BOOTSTRAP_SERVER:  # e.g. 127.0.0.1:9092
   KAFKA_TOPIC: example.001
 
   MANUAL_FLAG: True

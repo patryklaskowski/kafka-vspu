@@ -1,13 +1,18 @@
 services:
-  # TODO: Save image on DockerHub. Run without Dockerfiles
-  sum-the-age-mockup:
+
+  sum_the_age_mockup:
     build:
       context: .
       dockerfile: Dockerfile
     stdin_open: true  # docker run -i
-    tty: true  # docker run -t
+    tty: true         # docker run -t
     volumes:
+      # config.yaml env variables are superior to specified here.
+      # 'Cause they're created with python during runtime.
       - ./config.yaml:/data-producer/config.yaml
+    environment:
+      # If values are not specified, uses env variables from current shell
+      - BOOTSTRAP_SERVER
 
-# To run interactive session use
-# docker-compose run sum-the-age-mockup
+# Run interactive session use
+# > docker-compose run sum-the-age-mockup
