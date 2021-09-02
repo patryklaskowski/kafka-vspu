@@ -31,16 +31,28 @@ class RedisGateway:
     REDIS_FLAG_ENV_KEY = 'REDIS_FLAG'
     REDIS_LIMIT_KEY_ENV_KEY = 'REDIS_LIMIT_KEY'
 
-    def __init__(self, host=None, port=None, password=None):
+    def __init__(self, host=None, port=None, password=None, timeout=30):
         self.host = host
         self.port = int(port) if port else print('Choosing Redis default port: 6379') or 6379
         self.password = password
 
         self.r = redis.Redis(self.host, self.port, password=self.password, db=0, decode_responses=True)
-        self._test_connection()
+        self._test_connection_with(timeout)
 
     def __str__(self):
         return f'<{self.__class__.__name__} instance connected to server {self.host}:{self.port}>'
+
+    def _test_connection_with(self, timeout):
+        for t in range(1, timeout+1):
+            try:
+                self._test_connection()
+            except redis.exceptions.ConnectionError as e:
+                if t >= timeout:
+                    raise redis.exceptions.ConnectionError from e
+                else:
+                    time.sleep(1)
+            else:
+                break
 
     def _test_connection(self):
         try:
