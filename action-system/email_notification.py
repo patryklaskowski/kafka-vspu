@@ -101,13 +101,16 @@ if __name__ == '__main__':
         # Create send email loop
         while True:
             recent_max = consumer_t.recent_max_value() or DEFAULT_VALUE
+            most_recent = consumer_t.newest_datapoint() or DEFAULT_VALUE
+
             limit = limit_func() or DEFAULT_VALUE
 
-            log(f'Recent max {recent_max} (among top{consumer_t.maxlen} values). '
+            log(f'Recent max: {recent_max} (among top{consumer_t.maxlen} values). '
+                f'Most recent: {most_recent}. '
                 f'Limit: {limit}{" <DEFAULT_VALUE>" if limit==DEFAULT_VALUE else ""}. '
                 f'Interval: {args.interval_s} s.')
 
-            if limit != DEFAULT_VALUE and recent_max > limit:
+            if limit != DEFAULT_VALUE and most_recent > limit:
                 gmail.send(to=args.gmail_to,
                            body=args.gmail_message or args.gmail_message_from_file,
                            subject=args.gmail_subject)
