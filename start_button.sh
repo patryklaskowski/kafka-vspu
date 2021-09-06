@@ -45,11 +45,12 @@ stdout_file () {
 
 live_long_vspu () {
   # Pretty print logo
+  echo "$STDOUT_PREFIX"
   echo "$STDOUT_PREFIX            __       __"
   echo "$STDOUT_PREFIX    \  /   \__      |__) |    |"
   echo "$STDOUT_PREFIX     \/  .  __/  .  |  .  \__/  ."
   echo "$STDOUT_PREFIX "
-  echo "$STDOUT_PREFIX > Video Stream Pprocessing Unit <"
+  echo "$STDOUT_PREFIX > Video Stream Processing Unit <"
   echo "$STDOUT_PREFIX "
 }
 

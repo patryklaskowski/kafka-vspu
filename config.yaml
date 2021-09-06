@@ -1,0 +1,34 @@
+redis:
+  REDIS_FLAG: True
+  REDIS_HOST: redis
+  REDIS_PORT: 6379
+  REDIS_PASSWD: my_password
+  REDIS_LIMIT_KEY: limit
+
+gmail:
+  GMAIL_USER:  Your@email.here
+  GMAIL_PASSWD:  your_application_password
+
+  GMAIL_TO:  receiver1@gmail.com, receiver2@gmail.com
+  GMAIL_SUBJECT: My Subject Name
+  GMAIL_MESSAGE: Hello World message!
+  GMAIL_MESSAGE_FROM_FILE: # message_body.txt  (interchangeably with GMAIL_MESSAGE)  # Best absolute path
+
+kafka:
+  BOOTSTRAP_SERVER: 127.0.0.1:9092
+
+dash-live-plot:
+  DASH_LIVE_PLOT_LIMIT: 200  # Relevant if REDIS_FLAG: False
+  DASH_LIVE_PLOT_WINDOW: 110
+  DASH_LIVE_PLOT_INTERVAL_MS: 150
+
+email-notification:
+  EMAIL_NOTIFICATION_INTERVAL_S: 1
+  EMAIL_NOTIFICATION_LIMIT: 100  # Relevant if REDIS_FLAG: False
+  EMAIL_NOTIFICATION_VERBOSE: True
+
+kafka-streams:
+  # Java reads from env variables or use default
+  STREAMS_BOOTSTRAP_SERVERS: 127.0.0.1:9092
+  STREAMS_INPUT_TOPIC: example.001
+  STREAMS_OUTPUT_TOPIC: example.001.age.sum

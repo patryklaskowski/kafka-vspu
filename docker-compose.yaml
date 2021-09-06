@@ -1,18 +1,62 @@
 services:
-  # TODO: Save image on DockerHub. Run without Dockerfiles
+
+  redis:
+    image: redis
+    ports:
+      - 6379:6379
+    command: redis-server --requirepass my_password
+
+  kafka-to-database-connector:
+    image: patryklaskowski/vspu:kafka-to-database-connector.1.0
+    volumes:
+      - ./new_table.py:/connector/database/new_table.py  # Relative to docker-compose.yaml
+    command: "--bootstrap_server 127.0.0.1:9092
+                --group_id kafka-to-database
+                --topic example.001
+                --db_ip postgres"
+    depends_on:
+      - postgres
+
+  postgres:
+    image: postgres
+    ports:
+      - 5432:5432
+    volumes:
+      - ./postgres_volume:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_USER=postgres
 
   live_plot_with_dash:
-    build:
-      context: ./action-system
-      dockerfile: Dockerfile_live_plot_with_dash
+#    build:
+#      context: ../action-system  # Relative to docker-compose.yaml
+#      dockerfile: Dockerfile_live_plot_with_dash
+    image: patryklaskowski/vspu:live_plot_with_dash.1.0
     ports:
       - 8050:8050
     volumes:
-      - ./my_config.yaml:/action-system/config.yaml
+      - ./config.yaml:/action-system/config.yaml  # Relative to docker-compose.yaml
+    depends_on:
+      - redis
 
   email_notification:
-    build:
-      context: ./action-system
-      dockerfile: Dockerfile_email_notification
+#    build:
+#      context: ../action-system
+#      dockerfile: Dockerfile_email_notification
+    image: patryklaskowski/vspu:email_notification.1.0
     volumes:
-      - ./my_config.yaml:/action-system/config.yaml
+      - ./config.yaml:/action-system/config.yaml  # Relative to docker-compose.yaml
+    depends_on:
+      - redis
+
+  sum_the_age_streams:
+#    build:
+#      context: ../kafka-streams  # Relative to docker-compose.yaml
+#      dockerfile: Dockerfile
+    image: patryklaskowski/vspu:sumTheAge-kafka-streams.1.0
+    environment:
+      # If values are not specified, uses env variables from current shell
+      - STREAMS_BOOTSTRAP_SERVERS  # e.g. 127.0.0.1:9092
+      - STREAMS_INPUT_TOPIC  # e.g. example.001
+      - STREAMS_OUTPUT_TOPIC  # example.001.age.sum
